@@ -1,3 +1,3 @@
-module github.com/yalue/onnxruntime_go
+module github.com/parajav/onnxruntime_go
 
-go 1.19
+go 1.20
