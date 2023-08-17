@@ -265,6 +265,13 @@ func (t *Tensor[T]) GetData() []T {
 	return t.data
 }
 
+// Returns the slice containing the tensor's underlying data. The contents of
+// the slice can be read or written to get or set the tensor's contents.
+func (t *Tensor[T]) SetData(indata []T) error {
+	copy(t.data, indata)
+	return nil
+}
+
 // Returns the shape of the tensor. The returned shape is only a copy;
 // modifying this does *not* change the shape of the underlying tensor.
 // (Modifying the tensor's shape can only be accomplished by Destroying and
