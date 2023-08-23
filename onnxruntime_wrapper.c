@@ -46,7 +46,20 @@ const char *GetErrorMessage(OrtStatus *status) {
 OrtStatus *CreateSession(void *model_data, size_t model_data_length,
   OrtEnv *env, OrtSession **out) {
   OrtStatus *status = NULL;
-  OrtSessionOptions *options = NULL;
+  OrtSessionOptions *options = NULL;// OrtCUDAProviderOptions();
+  
+  enum GraphOptimizationLevel opLevel= ORT_ENABLE_ALL;
+  // status = ort_api->SetSessionGraphOptimizationLevel(options,opLevel );
+
+  //ort_api->CreateCUDAProviderOptions()
+  struct OrtCUDAProviderOptions  cudaOpts;
+  status = ort_api->SessionOptionsAppendExecutionProvider_CUDA(options,&cudaOpts);
+  if (status) return status;
+  
+  // parallel execution
+  /*enum ExecutionMode execMode = ORT_PARALLEL;
+  status = ort_api->SetSessionExecutionMode(options ,ORT_PARALLEL);*/
+
   status = ort_api->CreateSessionOptions(&options);
   if (status) return status;
   status = ort_api->CreateSessionFromArray(env, model_data, model_data_length,

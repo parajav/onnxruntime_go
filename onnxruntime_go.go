@@ -265,8 +265,7 @@ func (t *Tensor[T]) GetData() []T {
 	return t.data
 }
 
-// Returns the slice containing the tensor's underlying data. The contents of
-// the slice can be read or written to get or set the tensor's contents.
+// SetData Sets the tensor's underlying data with given input data
 func (t *Tensor[T]) SetData(indata []T) error {
 	copy(t.data, indata)
 	return nil
