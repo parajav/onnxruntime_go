@@ -7,6 +7,7 @@ package onnxruntime_go
 import (
 	"fmt"
 	"os"
+	"strings"
 	"unsafe"
 )
 
@@ -391,10 +392,10 @@ func NewSessionWithONNXData[T TensorData](onnxData []byte, inputNames,
 	}
 
 	var ortSession *C.OrtSession
-	if device == "cuda" {
+	if strings.ToLower(device) == "cuda" {
 		if status := C.CreateSessionWithCUDA(unsafe.Pointer(&(onnxData[0])),
 			C.size_t(len(onnxData)), ortEnv, &ortSession); status != nil {
-			return nil, fmt.Errorf("Error creating session: %w",
+			return nil, fmt.Errorf("Error creating CUDA session: %w",
 				statusToError(status))
 		}
 
@@ -402,7 +403,7 @@ func NewSessionWithONNXData[T TensorData](onnxData []byte, inputNames,
 		// default is CPU
 		if status := C.CreateSession(unsafe.Pointer(&(onnxData[0])),
 			C.size_t(len(onnxData)), ortEnv, &ortSession); status != nil {
-			return nil, fmt.Errorf("Error creating session: %w",
+			return nil, fmt.Errorf("Error creating CPU session: %w",
 				statusToError(status))
 		}
 	}
