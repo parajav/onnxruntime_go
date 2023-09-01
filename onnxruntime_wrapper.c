@@ -46,22 +46,48 @@ const char *GetErrorMessage(OrtStatus *status) {
 OrtStatus *CreateSession(void *model_data, size_t model_data_length,
   OrtEnv *env, OrtSession **out) {
   OrtStatus *status = NULL;
-  OrtSessionOptions *options = NULL;// OrtCUDAProviderOptions();
+  OrtSessionOptions *options = NULL;
   
-  enum GraphOptimizationLevel opLevel= ORT_ENABLE_ALL;
+  // TODO: enable optimizations in future
+  //enum GraphOptimizationLevel opLevel= ORT_ENABLE_ALL;
   // status = ort_api->SetSessionGraphOptimizationLevel(options,opLevel );
-
-  //ort_api->CreateCUDAProviderOptions()
-  struct OrtCUDAProviderOptions  cudaOpts;
-  status = ort_api->SessionOptionsAppendExecutionProvider_CUDA(options,&cudaOpts);
-  if (status) return status;
-  
-  // parallel execution
-  /*enum ExecutionMode execMode = ORT_PARALLEL;
-  status = ort_api->SetSessionExecutionMode(options ,ORT_PARALLEL);*/
 
   status = ort_api->CreateSessionOptions(&options);
   if (status) return status;
+  status = ort_api->CreateSessionFromArray(env, model_data, model_data_length,
+    options, out);
+  // It's OK to release the session options now, right? The docs don't say.
+  ort_api->ReleaseSessionOptions(options);
+  return status;
+}
+
+OrtStatus *CreateSessionWithCUDA(void *model_data, size_t model_data_length,
+  OrtEnv *env, OrtSession **out) {
+  OrtStatus *status = NULL;
+  OrtSessionOptions *options = NULL;
+
+  status = ort_api->CreateSessionOptions(&options);
+  if (status) return status;
+  
+ // CUDA EP involves 4 steps; create->update->AppendTOsession ->Release(As defer)
+ // step: create
+  OrtCUDAProviderOptionsV2* cuda_options = NULL;
+  status = ort_api->CreateCUDAProviderOptions(&cuda_options);
+  if (status) return status;
+  const char *keys = "device_id";
+  const char * values = "0";
+
+  // step update with devide_id:0
+  status = ort_api->UpdateCUDAProviderOptions(cuda_options, &keys, &values, 1);
+  if (status) return status;
+
+  status = ort_api-> SessionOptionsAppendExecutionProvider_CUDA_V2(options,cuda_options);
+  if (status) return status;
+   // TODO: enable optimizations in future
+  /* enum GraphOptimizationLevel opLevel= ORT_ENABLE_ALL;
+  status = ort_api->SetSessionGraphOptimizationLevel(options,opLevel );
+  if (status) return status;*/
+
   status = ort_api->CreateSessionFromArray(env, model_data, model_data_length,
     options, out);
   // It's OK to release the session options now, right? The docs don't say.

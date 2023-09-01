@@ -54,6 +54,10 @@ const char *GetErrorMessage(OrtStatus *status);
 OrtStatus *CreateSession(void *model_data, size_t model_data_length,
   OrtEnv *env, OrtSession **out);
 
+  // Creates an ORT session with CUDA provider using the given model.
+OrtStatus *CreateSessionWithCUDA(void *model_data, size_t model_data_length,
+  OrtEnv *env, OrtSession **out);
+
 // Runs an ORT session with the given input and output tensors, along with
 // their names. In our use case, outputs must NOT be NULL.
 OrtStatus *RunOrtSession(OrtSession *session,
